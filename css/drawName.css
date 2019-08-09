@@ -1,0 +1,90 @@
+.draw_con {
+    height: 100%;
+}
+
+.select_model {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 .76rem .2rem .76rem;
+}
+
+.font_con span {
+    display: inline-block;
+    margin-right: .4rem;
+    border: .02rem solid transparent;
+    padding: .08rem;
+}
+
+.font_con span:nth-of-type(1) i {
+    background: url("../img/one_font.png")no-repeat;
+    background-size: contain;
+}
+
+.font_con span:nth-of-type(2) i {
+    background: url("../img/two_font.png")no-repeat;
+    background-size: contain;
+}
+
+.font_con span:nth-of-type(3) i {
+    background: url("../img/three_font.png")no-repeat;
+    background-size: contain;
+}
+
+.select_model span i {
+    display: block;
+    width: .4rem;
+    height: .44rem;
+}
+
+.select_model .ac {
+    border: .02rem solid #000000;
+}
+
+.color_con {
+    display: flex;
+}
+
+.color_con span {
+    margin-right: .25rem;
+    border: .02rem solid transparent;
+    padding: .08rem;
+}
+
+.color_con span:nth-of-type(1) i {
+    background: #000000;
+}
+
+.color_con span:nth-of-type(2) i {
+    background: rgba(69,164,227,1);
+}
+
+.color_con span:nth-of-type(3) i {
+    background: rgba(231,73,88,1);
+}
+
+.bottom_local {
+    display: flex;
+    justify-content: space-between;
+    padding: .2rem .35rem;
+    border-top: .01rem solid rgba(153,153,153,1);
+}
+
+.bottom_local button {
+    width:1.82rem;
+    height:.8rem;
+    border:.02rem solid rgba(34,34,34,1);
+    border-radius:.09rem;
+    text-align: center;
+    line-height: .6rem;
+    font-size:.36rem;
+    font-family:PingFang-SC-Bold;
+    font-weight:bold;
+    color:rgba(34,34,34,1);
+    background: #ffffff;
+    outline: none;
+}
+
+.bottom_local button:nth-of-type(2) {
+    background:rgba(34,34,34,1);
+    color: #ffffff;
+}

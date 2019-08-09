@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>人脸核验</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/public.css">
+    <link rel="stylesheet" href="./css/faceAuth.css">
+    <script src="./js/lib-flexible.js"></script>
+    <script src="./js/axios.js"></script>
+    <script src="./js/vue.js"></script>
+</head>
+<body>
+
+<div class="face_con">
+    <header>人脸核验</header>
+    <div class="main">
+        <!--        顶部状态-->
+        <div class="status_con">
+            <div class="status_c">
+                <div class="status_item">
+                    <div class="ac_radius">1</div>
+                    <p>银行卡</p>
+                </div>
+                <div class="status_item">
+                    <div class="ac_radius">2</div>
+                    <p>人脸核验</p>
+                </div>
+                <div class="status_item">
+                    <div>3</div>
+                    <p>签约协议</p>
+                </div>
+            </div>
+        </div>
+
+<!--        选择识别方式-->
+        <div class="select_type">
+            <h4>请选择核验方式：</h4>
+            <div class="type_con">
+                <button :class="{'ac':userModel.type == 0}" @click="changeType(0)">腾讯信用</button>
+                <button :class="{'ac':userModel.type == 1}" @click="changeType(1)">芝麻信用</button>
+            </div>
+
+        </div>
+
+
+        <div class="btn_con">
+            <button class="btn" @click="getFaceUrl" :class="{'after_btn':!btnBoole}">{{btnMsg}}</button>
+        </div>
+    </div>
+
+
+    <div class="hind_con">
+        <div class="model" v-if="hindMsg"></div>
+        <div class="model_con" :class="{'show_model':showModel}">{{hindMsg}}</div>
+    </div>
+
+</div>
+</body>
+</html>
+
+<script>
+    new Vue({
+        el:'.face_con',
+        data:{
+            userModel:{
+                type:0,
+                api_token:'',
+                // redirect_url:window.location.host + '/userauth/protocol.html',
+                redirect_url:'http://www.baidu.com'
+            },
+            btnMsg:'确认',
+            btnBoole:true,
+            hindMsg:'',
+            showModel:false,
+        },
+        mounted() {
+            console.log(this.userModel.redirect_url);
+            this.hasUrlToken(window.location.href);
+        },
+
+        methods:{
+
+            /** 17:06
+              *   @author: yuanjie
+              *   @description:更换认证方式
+              *   @param{number} 当前点击的下标
+              */
+            changeType(index) {
+                this.userModel.type = index;
+            },
+
+            /** 17:08
+              *   @author: yuanjie
+              *   @description:获取人脸识别地址
+              *   @param
+              */
+            getFaceUrl() {
+                if(this.userModel.api_token == '') {
+                    this.hindMsg = '用户信息有误';
+                    this.showModel = true;
+                    this.closeModel();
+                    return false;
+                }
+
+                if(this.userModel.redirect_url == '') {
+                    this.hindMsg = '加上回调地址';
+                    this.showModel = true;
+                    this.closeModel();
+                    return false;
+                }
+
+                this.btnMsg = '拉取核验中';
+                if(this.btnBoole) {
+                    this.btnBoole = false;
+                    this.getDiscernFace();
+                }
+
+
+            },
+
+            /** 16:39
+             *   @author: yuanjie
+             *   @description:获取人脸识别地址
+             *   @param
+             */
+            getDiscernFace() {
+                axios.post('https://futures.grs555.com/api/common/eqb/face',this.userModel).then((res) => {
+                    if (res.data.status) {
+                        this.hindMsg = '获取成功';
+                        this.showModel = true;
+                        this.closeModel();
+                        this.btnMsg = '确认';
+                        this.btnBoole = true;
+                        setTimeout(() => {
+                            window.location.href = res.data.data;
+                        }, 2000)
+                    } else {
+                        this.hindMsg = res.data.msg;
+                        this.closeModel();
+                        this.btnBoole = true;
+                    }
+                })
+            },
+
+            /** 15:49
+             *   @author: yuanjie
+             *   @description:判断用户有没有token
+             *   @param{string} 当前浏览器的url
+             */
+            hasUrlToken(url) {
+
+                if (url == '') {
+                    throw 'url参数不能为空';
+                }
+                let indexNum = url.indexOf('?');
+                if (indexNum < 0) {
+                    throw '当前url参数格式有问题';
+                }
+                let obj = {};
+                let urlStr = url.substr(indexNum + 1, url.length);
+                let strList = urlStr.split('&');
+                for (let i = 0; i < strList.length; i++) {
+                    let itemIndex = strList[i].indexOf('=');
+                    let name = strList[i].substr(0, itemIndex);
+                    let val = strList[i].substr(itemIndex + 1, strList[i].length);
+                    obj[name] = val;
+                }
+
+                if (toString(obj) == '{}') {
+                    console.log('没有参数');
+                } else {
+                    console.log(obj);
+                    this.userModel.api_token = obj.token;
+                }
+            },
+
+            /** 16:11
+             *   @author: yuanjie
+             *   @description:关闭错误信息弹框
+             *   @param
+             */
+            closeModel() {
+                setTimeout(() => {
+                    this.hindMsg = '';
+                    this.showModel = false;
+                }, 3000)
+            }
+        }
+    })
+</script>

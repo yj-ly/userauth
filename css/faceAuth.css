@@ -1,0 +1,52 @@
+.select_type h4 {
+    font-size: .24rem;
+    margin: 0 0 .3rem .85rem;
+
+}
+
+.type_con {
+    padding: 0 .85rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.type_con button {
+    width: 2.6rem;
+    height: .98rem;
+    border-radius: .11rem;
+    text-align: center;
+    line-height: .68rem;
+    font-size: .36rem;
+    background: #cdcdcf;
+    border: none;
+    color: #ffffff;
+}
+
+.type_con .ac {
+    background: #222222;
+}
+
+.btn_con {
+    padding:  0 .35rem;
+}
+
+.btn {
+    height:.8rem;
+    background:rgba(34,34,34,1);
+    border-radius:.4rem;
+    text-align: center;
+    line-height: .8rem;
+    font-size:.36rem;
+    font-family:PingFang-SC-Medium;
+    font-weight:500;
+    color:rgba(255,255,255,1);
+    width: 100%;
+    border: none;
+    box-sizing: border-box;
+    display: block;
+}
+
+.after_btn {
+    background: #cccccc !important;
+}

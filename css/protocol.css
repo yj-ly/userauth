@@ -1,0 +1,72 @@
+.protocol_con {
+    background: #F8F8F8;
+    height: 100%;
+}
+
+.protocol_list {
+    margin-top: 10px;
+    background: #ffffff;
+}
+
+.protocol_list a {
+    display: block;
+    margin: 0 .35rem;
+    border-bottom: .01rem solid rgba(244,244,244,1);
+    padding: .26rem 0;
+    position: relative;
+}
+
+.protocol_list a:last-child {
+    border-bottom: none;
+}
+
+.protocol_list span {
+    font-size:.3rem;
+    font-family:PingFang-SC-Medium;
+    font-weight:500;
+    color:rgba(102,102,102,1);
+}
+
+.protocol_list i {
+    position: absolute;
+    right: 0;
+    width: .17rem;
+    height: .32rem;
+    background: url("../img/more.png")no-repeat;
+    background-size: contain;
+    top: .24rem;
+}
+
+.protocol_href {
+    margin: .4rem .35rem 1.33rem .35rem;
+    height:3.82rem;
+    border:1px solid rgba(153,153,153,1);
+    display: block;
+    text-align: center;
+    line-height: 3.82rem;
+    font-size:.6rem;
+    font-family:PingFang-SC-Medium;
+    font-weight:500;
+    color:rgba(208,208,208,1);
+}
+
+
+.btn_con {
+    padding: 0 .35rem;
+}
+
+.btn {
+    height:.8rem;
+    background:rgba(34,34,34,1);
+    border-radius:.4rem;
+    text-align: center;
+    line-height: .8rem;
+    font-size:.36rem;
+    font-family:PingFang-SC-Medium;
+    font-weight:500;
+    color:rgba(255,255,255,1);
+    width: 100%;
+    border: none;
+    box-sizing: border-box;
+    display: block;
+}

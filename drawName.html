@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>绘制签名</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/public.css">
+    <link rel="stylesheet" href="./css/drawName.css">
+    <script src="./js/lib-flexible.js"></script>
+    <script src="./js/jquery-2.1.1.js"></script>
+    <script src="./js/signature_pad.min.js"></script>
+<!--    <script src="./js/jquery.ui.touch-punch.min.js"></script>-->
+<!--    <script src="./js/axios.js"></script>-->
+</head>
+<body>
+
+<div class="draw_con">
+    <header><a href="javascript:history.back(-1)" class="back"></a>请绘制清晰可辩的签名</header>
+    <div class="main">
+
+        <canvas id="canvas"></canvas>
+
+    </div>
+
+    <div class="select_model" id="select_model">
+                    <div class="font_con">
+                        <span>
+                            <i></i>
+                        </span>
+                        <span>
+                            <i></i>
+                        </span>
+                        <span>
+                            <i></i>
+                        </span>
+                    </div>
+
+                    <div class="color_con">
+                        <span>
+                            <i></i>
+                        </span>
+                        <span>
+                            <i></i>
+                        </span>
+                        <span>
+                            <i></i>
+                        </span>
+                    </div>
+
+
+    </div>
+
+    <div class="bottom_local">
+        <button>清除</button>
+        <button id="save">保存</button>
+    </div>
+
+    <div class="hind_con">
+        <div class="model" v-if="hindMsg"></div>
+        <div class="model_con" :class="{'show_model':showModel}">{{hindMsg}}</div>
+    </div>
+</div>
+
+</body>
+</html>
+<script type="text/javascript">
+    function changeSize(){
+        console.log(document.body.clientHeight)
+        console.log($('header').eq(0).outerHeight());
+        console.log($('.bottom_local').eq(0).outerHeight());
+        console.log($('#select_model').outerHeight()  + 'se');
+        var canvasHeight = document.documentElement.clientHeight - $('header').eq(0).outerHeight() - $('.bottom_local').eq(0).outerHeight() - $('#select_model').outerHeight() / 2;
+        $("#canvas").attr({"height":canvasHeight,"width":window.innerWidth});
+        var canvasX = $("#canvas")[0];
+        signaturePad = new SignaturePad(canvasX,{
+            dotSize : 0 ,
+            velocityFilterWeight :1,
+            minWidth: 1.0,
+            maxWidth: 5.2,
+            penColor: "rgb(255,0,0)",
+
+            backgroundColor:"rgba(0,0,0,0)"
+        });
+    }
+
+    function isWeiXin(){
+        var ua = window.navigator.userAgent.toLowerCase();
+        if(ua.match(/MicroMessenger/i) == 'micromessenger'){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    function CloseWebPage(){
+        if (navigator.userAgent.indexOf("MSIE") > 0) {
+            if (navigator.userAgent.indexOf("MSIE 6.0") > 0) {
+                window.opener = null;
+                window.close();
+            } else {
+                window.open('', '_top');
+                window.top.close();
+            }
+        }
+        else if (navigator.userAgent.indexOf("Firefox") > 0) {
+            window.location.href = 'about:blank ';
+        }else {
+            window.opener = null;
+            window.open('', '_self', '');
+            window.close();
+        }
+    }
+        changeSize();
+        $(window).resize(function(){
+            changeSize();
+        });
+        $('#clear').click(function() {
+            signaturePad.clear();
+        });
+        $('.color').click(function() {
+            var canvasX = $("#canvas")[0];
+            signaturePad = new SignaturePad(canvasX,{
+                dotSize : 0 ,
+                velocityFilterWeight :1,
+                minWidth: 2.0,
+                maxWidth: 5.2,
+                penColor: $(this).css("background-color"),
+                backgroundColor:"rgb(255,255,255)"
+            });
+            $('.color').removeClass("select");
+            $(this).addClass("select");
+        });
+        $('#save').click(function() {
+            if(signaturePad.isEmpty()){
+                alert("画布为空，请先手绘签名再提交！");
+            }else{
+                var canvas = document.getElementById("canvas");
+                //获取图片的Base64，包含头信息data:image/png;base64,
+                var canvasData = canvas.toDataURL("image/png");
+                /* canvasData = encodeURIComponent(encodeURIComponent(canvasData));    */
+                //alert(canvasData);
+                //去掉图片Base64中的头信息data:image/png;base64,直接可作为sealData使用
+                var image_base64= canvasData.split(",")[1];
+                //alert(image_base64);
+                document.getElementById("sealData").value=image_base64;
+                //此处提交您的手写签名数据canvasData
+            }
+        });
+
+        $("#close").click(function(){
+            if(isWeiXin()){
+                WeixinJSBridge.call('closeWindow');
+            }else{
+                CloseWebPage();
+            }
+        });
+
+</script>
+

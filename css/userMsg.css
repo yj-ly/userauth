@@ -1,0 +1,57 @@
+.msg_con {
+    background: #F8F8F8;
+    height: 100%;
+}
+
+.user_msg {
+    padding: 0 .35rem;
+    background: #ffffff;
+}
+
+.msg_item {
+    display: flex;
+    align-items: center;
+    border-bottom: .01rem solid rgba(244, 244, 244, 1);
+}
+
+.msg_item:last-child {
+    border-bottom: none;
+}
+
+.msg_item span {
+    display: inline-block;
+    width: 2.3rem;
+    padding: .27rem 0;
+    font-size: .26rem;
+    font-family: PingFang-SC-Regular;
+    font-weight: 400;
+    color: rgba(34, 34, 34, 1);
+}
+
+.msg_item input {
+    flex: 1;
+    font-size:.3rem;
+    font-family:PingFang-SC-Medium;
+    font-weight:500;
+    color:rgba(34,34,34,1);
+}
+
+.btn_con {
+    padding: .6rem .35rem 0 .35rem;
+}
+
+.btn {
+    height:.8rem;
+    background:rgba(34,34,34,1);
+    border-radius:.4rem;
+    text-align: center;
+    line-height: .8rem;
+    font-size:.36rem;
+    font-family:PingFang-SC-Medium;
+    font-weight:500;
+    color:rgba(255,255,255,1);
+    width: 100%;
+    border: none;
+    box-sizing: border-box;
+    display: block;
+}

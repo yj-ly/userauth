@@ -1,0 +1,14 @@
+.protocol_dt {
+    background: #F8F8F8;
+    height: 100%;
+}
+
+.main {
+    font-size:.26rem;
+    font-family:PingFang-SC-Medium;
+    font-weight:500;
+    color:rgba(34,34,34,1);
+    line-height:.36rem;
+    padding: .37rem .35rem 0 .35rem;
+    text-indent: .3rem;
+}
