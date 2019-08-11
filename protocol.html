@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>签约协议</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/public.css">
     <link rel="stylesheet" href="./css/protocol.css">
@@ -33,32 +34,157 @@
             </div>
         </div>
 
-<!--        协议列表-->
-        <div class="protocol_list">
-            <a href="">
-                <span>协议111</span>
-                <i></i>
-            </a>
-            <a href="">
-                <span>协议111</span>
-                <i></i>
-            </a>
-            <a href="">
-                <span>协议111</span>
+        <!--        协议列表-->
+        <div class="protocol_list" v-if="protocolList.length > 0">
+            <a :href="'./protocolDetail.html?id='+item.id + '&token=' + userModel.api_token" v-for="(item,key) in protocolList" :key="key">
+                <span>{{item.name}}</span>
                 <i></i>
             </a>
         </div>
 
-<!--        点击手写板 跳转到手写协议-->
-        <a class="protocol_href" href="./drawName.html">
-            请在此使用正楷字签名
+        <!--        点击手写板 跳转到手写协议-->
+        <a class="protocol_href" :href="'./drawName.html?token='+userModel.api_token">
+            <span v-if="!userModel.base_img">请在此使用正楷字签名</span>
+            <img :src="userModel.imgSrc2 " alt="" v-else>
         </a>
 
         <!--        同意协议-->
         <div class="btn_con">
-            <button class="btn">同意协议</button>
+            <button class="btn" @click="consent" :class="{'after_btn':!btnBoole}">{{btnMsg}}</button>
+        </div>
+
+        <div class="hind_con">
+            <div class="model" v-if="hindMsg"></div>
+            <div class="model_con" :class="{'show_model':showModel}">{{hindMsg}}</div>
         </div>
     </div>
 </div>
 </body>
 </html>
+
+<script>
+    new Vue({
+        el: '.protocol_con',
+        data: {
+            hindMsg: '',
+            showModel: false,
+            userModel: {
+                imgSrc2: '',
+                api_token:'',
+                base_img:'',
+            },
+            btnMsg: '同意协议',
+            btnBoole: true,
+            protocolList:[],
+        },
+        mounted() {
+            this.hasUrlToken(window.location.href);
+            this.judgeUserDraw();
+            this.getProtocolList();
+        },
+        methods: {
+
+
+            /** 9:38
+             *   @author: yuanjie
+             *   @description:获取协议列表
+             *   @param
+             */
+            getProtocolList() {
+                axios.post('/api/common/eqb/agreementlist', this.userModel).then((res) => {
+                    if(res.data.status == true) {
+                        this.protocolList = res.data.data;
+                    }
+                })
+            },
+
+            /** 15:49
+             *   @author: yuanjie
+             *   @description:判断用户有没有token
+             *   @param{string} 当前浏览器的url
+             */
+            hasUrlToken(url) {
+
+                if (url == '') {
+                    throw 'url参数不能为空';
+                }
+                let indexNum = url.indexOf('?');
+                if (indexNum < 0) {
+                    throw '当前url参数格式有问题';
+                }
+                let obj = {};
+                let urlStr = url.substr(indexNum + 1, url.length);
+                let strList = urlStr.split('&');
+                for (let i = 0; i < strList.length; i++) {
+                    let itemIndex = strList[i].indexOf('=');
+                    let name = strList[i].substr(0, itemIndex);
+                    let val = strList[i].substr(itemIndex + 1, strList[i].length);
+                    obj[name] = val;
+                }
+
+                if (toString(obj) == '{}') {
+                    console.log('没有参数');
+                } else {
+                    this.userModel.api_token = obj.api_token;
+                }
+            },
+
+
+            /** 16:11
+             *   @author: yuanjie
+             *   @description:关闭错误信息弹框
+             *   @param
+             */
+            closeModel() {
+                setTimeout(() => {
+                    this.hindMsg = '';
+                    this.showModel = false;
+                }, 3000)
+            },
+            /** 9:13
+             *   @author: yuanjie
+             *   @description:判断下用户有没有签名
+             *   @param
+             */
+            judgeUserDraw() {
+                var nameImgUrl = sessionStorage.getItem('userDrawName');
+                if (nameImgUrl != null) {
+                    this.userModel.base_img = sessionStorage.getItem('resetImsgUrl');   //发送给后台的图片地址
+                    this.userModel.imgSrc2 = nameImgUrl;  //自己需要展示的图片地址
+                }
+            },
+
+            /** 9:29
+             *   @author: yuanjie
+             *   @description:同意协议
+             *   @param
+             */
+            consent() {
+                if (this.base_img == '') {
+                    this.hindMsg = '请先绘制您的签名';
+                    this.showModel = true;
+                    this.closeModel();
+                    return;
+                }
+
+                this.btnMsg = '资料上传中';
+                if (this.btnBoole) {
+                    this.btnBoole = false;
+                    axios.post('/api/common/eqb/signature', this.userModel).then((res) => {
+                        if (res.data.status) {
+                            this.hindMsg = '认证成功';
+                            this.showModel = true;
+                            this.closeModel();
+                        } else {
+                            this.hindMsg = res.data.msg;
+                            this.showModel = true;
+                            this.closeModel();
+                        }
+                        this.btnMsg = '同意协议';
+                        this.btnBoole = true;
+                    })
+                }
+            }
+        }
+    })
+</script>

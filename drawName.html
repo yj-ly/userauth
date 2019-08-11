@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>绘制签名</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/public.css">
     <link rel="stylesheet" href="./css/drawName.css">
     <script src="./js/lib-flexible.js"></script>
     <script src="./js/jquery-2.1.1.js"></script>
     <script src="./js/signature_pad.min.js"></script>
+    <script src="./js/vue.js"></script>
 <!--    <script src="./js/jquery.ui.touch-punch.min.js"></script>-->
 <!--    <script src="./js/axios.js"></script>-->
 </head>
@@ -24,25 +26,25 @@
 
     <div class="select_model" id="select_model">
                     <div class="font_con">
-                        <span>
+                        <span class="pen_size ac" data-size="1">
                             <i></i>
                         </span>
-                        <span>
+                        <span class="pen_size" data-size="2.5">
                             <i></i>
                         </span>
-                        <span>
+                        <span class="pen_size" data-size="4.5">
                             <i></i>
                         </span>
                     </div>
 
                     <div class="color_con">
-                        <span>
+                        <span class="color ac" data-color="#000000">
                             <i></i>
                         </span>
-                        <span>
+                        <span class="color" data-color="rgba(69,164,227,1)">
                             <i></i>
                         </span>
-                        <span>
+                        <span class="color" data-color="rgba(231,73,88,1)">
                             <i></i>
                         </span>
                     </div>
@@ -51,7 +53,7 @@
     </div>
 
     <div class="bottom_local">
-        <button>清除</button>
+        <button id="clear">清除</button>
         <button id="save">保存</button>
     </div>
 
@@ -64,21 +66,74 @@
 </body>
 </html>
 <script type="text/javascript">
+
+    var vm = new Vue({
+        el:'.draw_con',
+        data:{
+            hindMsg:'',  //提示信息
+            showModel:false, //展示提醒弹框
+        },
+        methods:{
+            /** 16:11
+             *   @author: yuanjie
+             *   @description:关闭错误信息弹框
+             *   @param
+             */
+            closeModel() {
+                setTimeout(() => {
+                    this.hindMsg = '';
+                    this.showModel = false;
+                }, 3000)
+            }
+        }
+    })
+
+    var penSize = 1;   //笔的大小
+    var penColor = '#000000';   //画笔的颜色
+    var token = '';
+
+    hasUrlToken(window.location.href);
+    /** 15:49
+     *   @author: yuanjie
+     *   @description:判断用户有没有token
+     *   @param{string} 当前浏览器的url
+     */
+    function  hasUrlToken(url) {
+        if (url == '') {
+            throw 'url参数不能为空';
+        }
+        let indexNum = url.indexOf('?');
+        if (indexNum < 0) {
+            // throw '当前url参数格式有问题';
+        }
+        let obj = {};
+        let urlStr = url.substr(indexNum + 1, url.length);
+        let strList = urlStr.split('&');
+        for (let i = 0; i < strList.length; i++) {
+            let itemIndex = strList[i].indexOf('=');
+            let name = strList[i].substr(0, itemIndex);
+            let val = strList[i].substr(itemIndex + 1, strList[i].length);
+            obj[name] = val;
+        }
+
+        if (toString(obj) == '{}') {
+            console.log('没有参数');
+        } else {
+            token = obj.token;
+        }
+
+    }
+
     function changeSize(){
-        console.log(document.body.clientHeight)
-        console.log($('header').eq(0).outerHeight());
-        console.log($('.bottom_local').eq(0).outerHeight());
-        console.log($('#select_model').outerHeight()  + 'se');
-        var canvasHeight = document.documentElement.clientHeight - $('header').eq(0).outerHeight() - $('.bottom_local').eq(0).outerHeight() - $('#select_model').outerHeight() / 2;
+        var canvasHeight = document.documentElement.clientHeight - $('header').eq(0).outerHeight() - $('.bottom_local').eq(0).outerHeight() - $('#select_model').outerHeight();
         $("#canvas").attr({"height":canvasHeight,"width":window.innerWidth});
         var canvasX = $("#canvas")[0];
         signaturePad = new SignaturePad(canvasX,{
             dotSize : 0 ,
             velocityFilterWeight :1,
-            minWidth: 1.0,
+            minWidth: penSize,
             maxWidth: 5.2,
-            penColor: "rgb(255,0,0)",
-
+            penColor: penColor,
             backgroundColor:"rgba(0,0,0,0)"
         });
     }
@@ -117,22 +172,45 @@
         $('#clear').click(function() {
             signaturePad.clear();
         });
-        $('.color').click(function() {
+
+
+
+        $('.pen_size').click(function () {
             var canvasX = $("#canvas")[0];
+            penSize = $(this).attr('data-size');
             signaturePad = new SignaturePad(canvasX,{
                 dotSize : 0 ,
                 velocityFilterWeight :1,
-                minWidth: 2.0,
+                minWidth: penSize,
                 maxWidth: 5.2,
-                penColor: $(this).css("background-color"),
+                penColor:penColor,
                 backgroundColor:"rgb(255,255,255)"
             });
-            $('.color').removeClass("select");
-            $(this).addClass("select");
+            $('.pen_size').removeClass("ac");
+            $(this).addClass("ac");
+        })
+
+
+        $('.color').click(function() {
+            var canvasX = $("#canvas")[0];
+            penColor = $(this).attr('data-color');
+            signaturePad = new SignaturePad(canvasX,{
+                dotSize : 0 ,
+                velocityFilterWeight :1,
+                minWidth: penSize,
+                maxWidth: 5.2,
+                penColor:penColor,
+                backgroundColor:"rgb(255,255,255)"
+            });
+            $('.color').removeClass("ac");
+            $(this).addClass("ac");
         });
         $('#save').click(function() {
             if(signaturePad.isEmpty()){
-                alert("画布为空，请先手绘签名再提交！");
+                vm.hindMsg = '绘画名字为空';
+                vm.showModel = true;
+                vm.closeModel();
+
             }else{
                 var canvas = document.getElementById("canvas");
                 //获取图片的Base64，包含头信息data:image/png;base64,
@@ -142,8 +220,14 @@
                 //去掉图片Base64中的头信息data:image/png;base64,直接可作为sealData使用
                 var image_base64= canvasData.split(",")[1];
                 //alert(image_base64);
-                document.getElementById("sealData").value=image_base64;
-                //此处提交您的手写签名数据canvasData
+                console.log(canvasData);
+                sessionStorage.setItem('userDrawName',canvasData);
+                sessionStorage.setItem('resetImsgUrl',image_base64)
+
+                vm.hindMsg = '保存成功';
+                vm.showModel = true;
+                vm.closeModel();
+                window.location.href = './protocol.html?api_token='+token;
             }
         });
 

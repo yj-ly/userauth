@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>协议详情</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/public.css">
     <link rel="stylesheet" href="./css/protocolDetail.css">
@@ -12,12 +13,89 @@
 </head>
 <body>
 <div class="protocol_dt">
-    <header><a href="javascript:history.back(-1)" class="back"></a> 协议11</header>
-    <div class="main">
-        <p>中国足协竞赛部负责人3日在接受采访时表示：29日中国足协阿竞赛部接到“熊猫杯”国际青年足球锦标赛组委会报告，韩国一名是的球员在比赛颁奖仪式后对奖杯做出了侮辱行为。该事件发生后，赛事组委会已立即对韩国参赛队伍进行了严正抗议和交涉，韩国队也意识到该事件所造成的不良后果，返回酒店后立即召开了新闻通气会，队员朴圭贤和主教练及全体队员对媒体和公众进行了公开道歉，韩国足协稍后也向组委会发来了致歉信。组委会也将事件处理情况第一时间向中国足协提交了报告。</p>
+    <header v-if="detail != null"><a href="javascript:history.back(-1)" class="back" ></a> {{detail.name}}</header>
+    <div class="main" v-if=" detailUrl">
+        <iframe :src="detailUrl"></iframe>
+    </div>
 
+<!--    loading-->
+
+    <div class="loading" v-if="showLoading">
+        <div class="model"></div>
+        <img src="./img/loading.gif" alt="">
     </div>
 </div>
 
 </body>
 </html>
+
+<script>
+    new Vue({
+        el:'.protocol_dt',
+        data:{
+            showLoading:false,
+            userModel:{
+                agrer_id:'',
+                api_token:''
+            },
+            detailUrl:'',
+            detail:null
+        },
+        mounted() {
+            this.showLoading = true;
+            this.hasUrlToken(window.location.href);
+            this.getProtocolDetail();
+        },
+        methods:{
+            /** 10:23
+              *   @author: yuanjie
+              *   @description:获取协议详情
+              *   @param
+              */
+
+            getProtocolDetail() {
+                axios.post('/api/common/eqb/agreementdetail', this.userModel).then((res) => {
+                    if(res.data.status == true) {
+                        this.detailUrl = location.host + '/storage/'+ res.data.data.pdf_path;
+                        // this.detailUrl = 'https://futures.grs555.com' + '/storage/'+ res.data.data.pdf_path;
+                        this.showLoading = false;
+                        this.detail = res.data.data;
+                    }
+                })
+
+            },
+
+            /** 15:49
+             *   @author: yuanjie
+             *   @description:判断用户有没有token
+             *   @param{string} 当前浏览器的url
+             */
+            hasUrlToken(url) {
+                if (url == '') {
+                    throw 'url参数不能为空';
+                }
+                let indexNum = url.indexOf('?');
+                if (indexNum < 0) {
+                    // throw '当前url参数格式有问题';
+                }
+                let obj = {};
+                let urlStr = url.substr(indexNum + 1, url.length);
+                let strList = urlStr.split('&');
+                for (let i = 0; i < strList.length; i++) {
+                    let itemIndex = strList[i].indexOf('=');
+                    let name = strList[i].substr(0, itemIndex);
+                    let val = strList[i].substr(itemIndex + 1, strList[i].length);
+                    obj[name] = val;
+                }
+
+                if (toString(obj) == '{}') {
+                    console.log('没有参数');
+                } else {
+                    this.userModel.agrer_id = obj.id;
+                    this.userModel.api_token = obj.token;
+                }
+
+            },
+        }
+    })
+</script>

@@ -5,11 +5,16 @@
 .select_model {
     display: flex;
     justify-content: space-between;
-    padding: 0 .76rem .2rem .76rem;
+    padding: 0 .36rem .2rem .36rem;
+    box-sizing: border-box;
+}
+
+.font_con {
+    display: flex;
 }
 
 .font_con span {
-    display: inline-block;
+    display: block;
     margin-right: .4rem;
     border: .02rem solid transparent;
     padding: .08rem;
@@ -45,6 +50,7 @@
 }
 
 .color_con span {
+    display: block;
     margin-right: .25rem;
     border: .02rem solid transparent;
     padding: .08rem;
@@ -67,6 +73,7 @@
     justify-content: space-between;
     padding: .2rem .35rem;
     border-top: .01rem solid rgba(153,153,153,1);
+    box-sizing: border-box;
 }
 
 .bottom_local button {

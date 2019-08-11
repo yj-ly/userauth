@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>银行卡认证</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/public.css">
     <link rel="stylesheet" href="./css/userMsg.css">
@@ -61,11 +62,30 @@
         </div>
     </div>
 
+<!--    提示信息-->
     <div class="hind_con">
-        <div class="model" v-if="hindMsg"></div>
+        <div class="model" v-if="showModel"></div>
         <div class="model_con" :class="{'show_model':showModel}">{{hindMsg}}</div>
     </div>
 
+<!--   用户输入手机号 -->
+    <div class="code_con">
+        <div class="model" v-if="showAuthModel">
+        </div>
+
+        <div class="model_con" v-if="showAuthModel">
+            <div class="top">
+                <span>请输入验证码</span>
+                <input type="text" v-model="codeAuth.code">
+            </div>
+            <p class="hind_msg" v-if="errorMsg">{{errorMsg}}</p>
+            <div class="button_con">
+                <button @click="cacelAuth">取消</button>
+                <button @click="submitCode">{{btnMsg2}}</button>
+            </div>
+
+        </div>
+    </div>
 
 </div>
 
@@ -77,20 +97,29 @@
         el: '.msg_con',
         data: {
             msgModel: {
-                phone: '18182258594',
-                api_token: 'ed1wjvyfQaGBaGJqPIrohuAvOGA7GhbzbPZ6DyTrOvwtj9qvWiVU0wOPcvgtrgmh',
-                realname: '袁杰',
-                idcard: '500382199806294651',
-                bank_card: '6215983760002023172'
+                phone: '',
+                api_token: '',
+                realname: '',
+                idcard: '',
+                bank_card: ''
             },
             btnMsg: '申请认证',
             hindMsg: '',   //提示信息
             showModel: false,
             btnBoole: true,
+
+            showAuthModel:false,  //展示认证短信弹框
+            codeAuth:{
+                code:'',
+                api_token:'',
+            },
+            btnMsg2:'确认',
+            errorMsg:''
+
         },
 
         mounted() {
-            // this.hasUrlToken();
+            this.hasUrlToken(window.location.href);
         },
 
         methods: {
@@ -101,7 +130,6 @@
              *   @param{string} 当前浏览器的url
              */
             hasUrlToken(url) {
-
                 if (url == '') {
                     throw 'url参数不能为空';
                 }
@@ -122,7 +150,9 @@
                 if (toString(obj) == '{}') {
                     console.log('没有参数');
                 } else {
+
                     this.msgModel.api_token = obj.api_token;
+                    this.codeAuth.api_token = obj.api_token;
                 }
 
             },
@@ -186,7 +216,7 @@
 
                 this.btnMsg = '资料上传中';
                 this.btnBoole = false;
-                axios.post('https://futures.grs555.com/api/common/eqb/fourAuth', this.msgModel).then((res) => {
+                axios.post('/api/common/eqb/fourAuth', this.msgModel).then((res) => {
                     if (res.data.status) {
                         this.queryUserAuth();  //查询用户上传资料状态
                     } else {
@@ -197,9 +227,57 @@
                         this.btnBoole = true;
                     }
                 })
+            },
+
+            /** 9:49
+              *   @author: yuanjie
+              *   @description:取消用户短信弹框
+              *   @param
+              */
+            cacelAuth() {
+                this.showAuthModel = false;
+                this.hindMsg = '';
+            },
+
+            /** 10:02
+              *   @author: yuanjie
+              *   @description:提交验证码
+              *   @param
+              */
+            submitCode() {
+                if(this.codeAuth.code == '') {
+                    this.errorMsg = '请输入验证码';
+                    return false;
+                }
+                this.errorMsg = '';
+                this.btnMsg2 = '加载中';
+                if(this.btnBoole) {
+                    this.btnBoole = false;
+                    axios.post('/api/common/eqb/getinfo', this.codeAuth).then((res) => {
+                        if(res.data.status == true) {
+                            this.showAuthModel = false;
+                            this.btnMsg2 = '确认';
+                            this.hindMsg = '即将开始人脸核验';
+                            this.showModel = true;
+                            this.closeModel();
+
+                            setTimeout(() => {
+                                window.location.href = `./faceAuth.html?token=${this.msgModel.api_token}`;
+                            }, 2000)
+                        }else {
+                            this.btnMsg2 = '确认';
+                            this.errorMsg = res.data.msg;
+                        }
+                        this.btnBoole = true;
+                    })
+                }
 
 
             },
+
+
+
+
 
             /** 16:36
              *   @author: yuanjie
@@ -207,16 +285,14 @@
              *   @param
              */
             queryUserAuth() {
-                axios.post('https://futures.grs555.com/api/common/eqb/getinfo', this.msgModel).then((res) => {
+                axios.post('/api/common/eqb/getinfo', this.msgModel).then((res) => {
                     if (res.data.status) {
-                        this.hindMsg = '资料上传成功,即将开始人脸核验';
-                        this.showModel = true;
-                        this.closeModel();
+                        // this.hindMsg = '资料上传成功';
+                        // this.showModel = true;
+                        // this.closeModel();
                         this.btnMsg = '申请认证';
                         this.btnBoole = true;
-                        setTimeout(() => {
-                            window.location.href = `./faceAuth.html?token=${this.msgModel.api_token}`;
-                        }, 2000)
+                        this.showAuthModel = true;
                     } else {
                         this.hindMsg = res.data.msg;
                         this.btnMsg = '申请认证';
