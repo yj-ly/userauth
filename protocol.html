@@ -83,8 +83,6 @@
             this.getProtocolList();
         },
         methods: {
-
-
             /** 9:38
              *   @author: yuanjie
              *   @description:获取协议列表
@@ -172,7 +170,7 @@
                     this.btnBoole = false;
                     axios.post('/api/common/eqb/signature', this.userModel).then((res) => {
                         if (res.data.status) {
-                            this.hindMsg = '认证成功,';
+                            this.hindMsg = '认证成功';
                             this.showModel = true;
                             setTimeout(() => {
                                window.location.href = './success.html';
