@@ -62,13 +62,13 @@
         </div>
     </div>
 
-<!--    提示信息-->
+    <!--    提示信息-->
     <div class="hind_con">
         <div class="model" v-if="showModel"></div>
         <div class="model_con" :class="{'show_model':showModel}">{{hindMsg}}</div>
     </div>
 
-<!--   用户输入手机号 -->
+    <!--   用户输入手机号 -->
     <div class="code_con">
         <div class="model" v-if="showAuthModel">
         </div>
@@ -76,7 +76,7 @@
         <div class="model_con" v-if="showAuthModel">
             <div class="top">
                 <span>请输入验证码</span>
-                <input type="text" v-model="codeAuth.code">
+                <input type="text" v-model="codeAuth.code" maxlength="6">
             </div>
             <p class="hind_msg" v-if="errorMsg">{{errorMsg}}</p>
             <div class="button_con">
@@ -109,12 +109,12 @@
             btnBoole: true,
 
             showAuthModel:false,  //展示认证短信弹框
-            codeAuth:{
-                code:'',
-                api_token:'',
+            codeAuth: {
+                code: '',
+                api_token: '',
             },
-            btnMsg2:'确认',
-            errorMsg:''
+            btnMsg2: '确认',
+            errorMsg: ''
 
         },
 
@@ -153,6 +153,18 @@
 
                     this.msgModel.api_token = obj.api_token;
                     this.codeAuth.api_token = obj.api_token;
+
+                    if(obj.type == 0) {
+                        return;
+                    }else if (obj.type == 1) {
+                        window.location.href = './faceAuth.html?token='+obj.api_token;  //刷脸
+                    }else if (obj.type == 2) {
+                        window.location.href = './protocol.html?api_token='+obj.api_token; //签约协议
+                    }else if (obj.type == 3) {
+                        this.showModel = true;
+                        this.hindMsg = '当前账号已经完成认证';
+                        this.closeModel();
+                    }
                 }
 
             },
@@ -215,69 +227,33 @@
                 }
 
                 this.btnMsg = '资料上传中';
-                this.btnBoole = false;
-                axios.post('/api/common/eqb/fourAuth', this.msgModel).then((res) => {
-                    if (res.data.status) {
-                        this.queryUserAuth();  //查询用户上传资料状态
-                    } else {
-                        this.hindMsg = res.data.msg;
-                        this.showModel = true;
-                        this.btnMsg = '申请认证';
-                        this.closeModel();
-                        this.btnBoole = true;
-                    }
-                })
+                if (this.btnBoole) {
+                    this.btnBoole = false;
+                    axios.post('/api/common/eqb/fourAuth', this.msgModel).then((res) => {
+                        if (res.data.status) {
+                            this.queryUserAuth();  //查询用户上传资料状态
+                            this.btnBoole = true;
+                        } else {
+                            this.hindMsg = res.data.msg;
+                            this.showModel = true;
+                            this.btnMsg = '申请认证';
+                            this.closeModel();
+                            this.btnBoole = true;
+                        }
+                    })
+                }
             },
 
             /** 9:49
-              *   @author: yuanjie
-              *   @description:取消用户短信弹框
-              *   @param
-              */
+             *   @author: yuanjie
+             *   @description:取消用户短信弹框  并把相应的错误信息给清除
+             *   @param
+             */
             cacelAuth() {
                 this.showAuthModel = false;
                 this.hindMsg = '';
-            },
-
-            /** 10:02
-              *   @author: yuanjie
-              *   @description:提交验证码
-              *   @param
-              */
-            submitCode() {
-                if(this.codeAuth.code == '') {
-                    this.errorMsg = '请输入验证码';
-                    return false;
-                }
                 this.errorMsg = '';
-                this.btnMsg2 = '加载中';
-                if(this.btnBoole) {
-                    this.btnBoole = false;
-                    axios.post('/api/common/eqb/getinfo', this.codeAuth).then((res) => {
-                        if(res.data.status == true) {
-                            this.showAuthModel = false;
-                            this.btnMsg2 = '确认';
-                            this.hindMsg = '即将开始人脸核验';
-                            this.showModel = true;
-                            this.closeModel();
-
-                            setTimeout(() => {
-                                window.location.href = `./faceAuth.html?token=${this.msgModel.api_token}`;
-                            }, 2000)
-                        }else {
-                            this.btnMsg2 = '确认';
-                            this.errorMsg = res.data.msg;
-                        }
-                        this.btnBoole = true;
-                    })
-                }
-
-
             },
-
-
-
-
 
             /** 16:36
              *   @author: yuanjie
@@ -287,9 +263,6 @@
             queryUserAuth() {
                 axios.post('/api/common/eqb/getinfo', this.msgModel).then((res) => {
                     if (res.data.status) {
-                        // this.hindMsg = '资料上传成功';
-                        // this.showModel = true;
-                        // this.closeModel();
                         this.btnMsg = '申请认证';
                         this.btnBoole = true;
                         this.showAuthModel = true;
@@ -301,6 +274,44 @@
                     }
                 })
             },
+
+            /** 10:02
+             *   @author: yuanjie
+             *   @description:提交验证码
+             *   @param
+             */
+            submitCode() {
+                if (this.codeAuth.code == '') {
+                    this.errorMsg = '请输入验证码';
+                    return false;
+                }
+                if (this.codeAuth.code.length != 6) {
+                    this.errorMsg = '验证码格式有误';
+                    return false;
+                }
+                this.errorMsg = '';
+                this.btnMsg2 = '加载中';
+                if (this.btnBoole) {
+                    this.btnBoole = false;
+                    axios.post('/api/common/eqb/sendcode', this.codeAuth).then((res) => {
+                        if (res.data.status == true) {
+                            this.showAuthModel = false;
+                            this.btnMsg2 = '确认';
+                            this.hindMsg = '即将开始人脸核验';
+                            this.showModel = true;
+                            this.closeModel();
+                            setTimeout(() => {
+                                window.location.href = `./faceAuth.html?token=${this.msgModel.api_token}`;
+                            }, 2000)
+                        } else {
+                            this.btnMsg2 = '确认';
+                            this.errorMsg = res.data.msg;
+                        }
+                        this.btnBoole = true;
+                    })
+                }
+            },
+
             /** 13:10
              *   @author: yuanjie
              *   @description:验证身份证号

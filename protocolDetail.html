@@ -7,18 +7,19 @@
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/public.css">
     <link rel="stylesheet" href="./css/protocolDetail.css">
+    <link rel="stylesheet" href="./css/pdfh5.css">
     <script src="./js/lib-flexible.js"></script>
     <script src="./js/axios.js"></script>
     <script src="./js/vue.js"></script>
 </head>
 <body>
 <div class="protocol_dt">
-    <header v-if="detail != null"><a href="javascript:history.back(-1)" class="back" ></a> {{detail.name}}</header>
-    <div class="main" v-if=" detailUrl">
-        <iframe :src="detailUrl"></iframe>
+    <header v-if="detail != null"><a href="javascript:history.back(-1)" class="back"></a> {{detail.name}}</header>
+    <div class="main" id="main">
+
     </div>
 
-<!--    loading-->
+    <!--    loading-->
 
     <div class="loading" v-if="showLoading">
         <div class="model"></div>
@@ -29,42 +30,29 @@
 </body>
 </html>
 
+<script src="./js/pdf.js" type="text/javascript" charset="utf-8"></script>
+<script src="./js/pdf.worker.js" type="text/javascript" charset="utf-8"></script>
+<script src="./js/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="./js/pdfh5.js" type="text/javascript" charset="utf-8"></script>
+
 <script>
     new Vue({
-        el:'.protocol_dt',
-        data:{
-            showLoading:false,
-            userModel:{
-                agrer_id:'',
-                api_token:''
+        el: '.protocol_dt',
+        data: {
+            showLoading: false,
+            userModel: {
+                agrer_id: '',
+                api_token: ''
             },
-            detailUrl:'',
-            detail:null
+            detailUrl: '',
+            detail: null
         },
         mounted() {
             this.showLoading = true;
             this.hasUrlToken(window.location.href);
             this.getProtocolDetail();
         },
-        methods:{
-            /** 10:23
-              *   @author: yuanjie
-              *   @description:获取协议详情
-              *   @param
-              */
-
-            getProtocolDetail() {
-                axios.post('/api/common/eqb/agreementdetail', this.userModel).then((res) => {
-                    if(res.data.status == true) {
-                        this.detailUrl = location.host + '/storage/'+ res.data.data.pdf_path;
-                        // this.detailUrl = 'https://futures.grs555.com' + '/storage/'+ res.data.data.pdf_path;
-                        this.showLoading = false;
-                        this.detail = res.data.data;
-                    }
-                })
-
-            },
-
+        methods: {
             /** 15:49
              *   @author: yuanjie
              *   @description:判断用户有没有token
@@ -95,6 +83,26 @@
                     this.userModel.api_token = obj.token;
                 }
 
+            },
+
+            /** 10:23
+             *   @author: yuanjie
+             *   @description:获取协议详情
+             *   @param
+             */
+
+            getProtocolDetail() {
+                axios.post('/api/common/eqb/agreementdetail', this.userModel).then((res) => {
+                    if (res.data.status == true) {
+                        this.showLoading = false;
+                        this.detail = res.data.data;
+                        this.$nextTick(() => {
+                            var pdfh5 = new Pdfh5('#main', {
+                                pdfurl: this.detail.pdf_url
+                            });
+                        })
+                    }
+                })
             },
         }
     })

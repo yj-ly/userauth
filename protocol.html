@@ -172,9 +172,11 @@
                     this.btnBoole = false;
                     axios.post('/api/common/eqb/signature', this.userModel).then((res) => {
                         if (res.data.status) {
-                            this.hindMsg = '认证成功';
+                            this.hindMsg = '认证成功,';
                             this.showModel = true;
-                            this.closeModel();
+                            setTimeout(() => {
+                               window.location.href = './success.html';
+                            },2000)
                         } else {
                             this.hindMsg = res.data.msg;
                             this.showModel = true;
