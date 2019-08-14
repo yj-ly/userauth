@@ -38,8 +38,9 @@
         <div class="select_type">
             <h4>请选择核验方式：</h4>
             <div class="type_con">
-                <button :class="{'ac':userModel.type == 0}" @click="changeType(0)">腾讯信用</button>
                 <button :class="{'ac':userModel.type == 1}" @click="changeType(1)">芝麻信用</button>
+                <button :class="{'ac':userModel.type == 0}" @click="changeType(0)">腾讯信用</button>
+
             </div>
 
         </div>
@@ -65,7 +66,7 @@
         el:'.face_con',
         data:{
             userModel:{
-                type:0,
+                type:1,
                 api_token:'',
                 redirect_url:window.location.host + '/userauth/authstatus.html',
             },
